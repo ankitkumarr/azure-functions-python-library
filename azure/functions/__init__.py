@@ -25,6 +25,7 @@ from . import queue  # NoQA
 from . import servicebus  # NoQA
 from . import timer  # NoQA
 from . import durable_functions  # NoQA
+from . import functionapp
 
 
 __all__ = (
@@ -52,7 +53,12 @@ __all__ = (
     'TimerRequest',
 
     # Middlewares
-    'WsgiMiddleware'
+    'WsgiMiddleware',
+
+    # Functionapp stuff
+    'AzureFunctionApp',
+    'HttpTrigger',
+    'BlobInput'
 )
 
 __version__ = '1.3.0'
