@@ -25,7 +25,7 @@ from . import queue  # NoQA
 from . import servicebus  # NoQA
 from . import timer  # NoQA
 from . import durable_functions  # NoQA
-from . import functionapp
+from .functionapp import AzureFunctionApp, AzureFunction, HttpTrigger, BlobInput, Http
 
 
 __all__ = (
@@ -57,8 +57,10 @@ __all__ = (
 
     # Functionapp stuff
     'AzureFunctionApp',
+    'AzureFunction',
     'HttpTrigger',
-    'BlobInput'
+    'BlobInput',
+    'Http'
 )
 
 __version__ = '1.3.0'

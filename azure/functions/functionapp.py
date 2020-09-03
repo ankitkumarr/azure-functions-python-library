@@ -1,3 +1,5 @@
+import inspect
+
 class AzureFunctionApp(object):
 
     def __init__(self, app_name):
@@ -37,11 +39,39 @@ class AzureFunctionApp(object):
 
     def add_function(self, function):
         self.functions[function.name] = function
-        # functionArgs = list(function.function.__code__.co_varnames)
-        # need to go back and figure out what the bindings names are for their args
-        # for binding in function.bindings:
-        #     if binding.name != '$return':
-        #         binding.name = functionArgs.pop()
+        functionArgs = list(function.function.__code__.co_varnames)
+        functionArgs = functionArgs[0:function.function.__code__.co_argcount]
+        #need to go back and figure out what the bindings names are for their args
+        for binding in function.bindings:
+            if binding.name != '$return':
+                binding.name = functionArgs.pop()
+
+    def register_blueprint(self, blueprint):
+        for key, value in blueprint.functions.items():
+            self.functions[key] = value
+
+    def HttpTrigger(self,  argName=None, route=None, authLevel="anonymous", methods=["get", "post"]):
+        trigger = HttpTrigger(argName, route, authLevel, methods)
+
+        def decorator(function):
+            # make sure that the function is actually an azure function
+            if not isinstance(function, AzureFunction):
+                function = AzureFunction(function)
+            function.bindings.append(trigger)
+            self.add_function(function)
+            return function
+        return decorator
+
+    def HttpOutput(self):
+        output = Http()
+
+        def decorator(function):
+            # make sure that the function is actually an azure function
+            if not isinstance(function, AzureFunction):
+                function = AzureFunction(function)
+            function.bindings.append(output)
+            return function
+        return decorator
 
 
 class AzureFunction(object):
@@ -69,7 +99,7 @@ class Binding(object):
 
 
 class HttpTrigger(Binding):
-    def __init__(self, argName, route=None, authLevel="anonymous", methods=["get", "post"]):
+    def __init__(self, argName=None, route=None, authLevel="anonymous", methods=["get", "post"]):
         super().__init__('httpTrigger', None, argName, None, 'in', None)
         self.route = route
         self.authLevel = authLevel
@@ -85,3 +115,8 @@ class BlobInput(Binding):
         super().__init__('blob', 'connection', 'this gon be the function param', 'cardinality', 'in', 'binary')
         self.path = path
         self.connection = connection
+
+class Blueprint(AzureFunctionApp):
+    def __init__(self, app_name):
+        super().__init__(app_name)
+    
